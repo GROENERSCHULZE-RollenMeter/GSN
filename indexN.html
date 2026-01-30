@@ -1,0 +1,275 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Nutzen-Optimierer | Gröner-Schulze</title>
+    <style>
+        :root {
+            --brand-navy: #0E1D3A;
+            --brand-cyan: #1DA1F2;
+            --bg-page: #ffffff;      
+            --card-bg: #0E1D3A;      
+            --field-light: #ffffff;  
+            --text-gray: #a0aec0;
+        }
+
+        html, body { 
+            height: 100%; 
+            margin: 0;
+            background: var(--bg-page); 
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; 
+            display: flex; 
+            justify-content: center; 
+            align-items: center; 
+            overflow: hidden;
+        }
+
+        .card { 
+            background: var(--brand-navy); 
+            padding: 25px; 
+            border-radius: 28px; 
+            box-shadow: 0 20px 50px rgba(14, 29, 58, 0.3); 
+            width: 88%; 
+            max-width: 360px; 
+            border: 1px solid rgba(255, 255, 255, 0.08);
+            position: relative;
+        }
+
+        .top-controls { 
+            position: absolute; 
+            top: 10px; 
+            left: 15px; 
+            right: 15px; 
+            display: flex; 
+            justify-content: space-between; 
+            z-index: 10;
+        }
+
+        select { 
+            font-size: 0.75em; 
+            padding: 5px 8px; 
+            border-radius: 8px; 
+            border: 1px solid rgba(255,255,255,0.2); 
+            background: var(--field-light); 
+            color: var(--brand-navy); 
+            font-weight: bold;
+            outline: none; 
+        }
+
+        .logo-container { text-align: center; padding-top: 20px; cursor: pointer; }
+        .logo-container img { max-width: 80%; height: auto; max-height: 55px; }
+
+        .app-title {
+            color: white;
+            text-align: center;
+            font-size: 1.15em;
+            font-weight: 600;
+            margin-bottom: 15px;
+            letter-spacing: 0.5px;
+            display: block;
+        }
+
+        .divider { 
+            height: 3px; 
+            background: linear-gradient(90deg, transparent 0%, var(--brand-cyan) 50%, transparent 100%); 
+            width: 100%; 
+            margin-bottom: 20px; 
+        }
+
+        .input-row { display: flex; gap: 10px; margin-bottom: 12px; }
+        .input-group { flex: 1; }
+        
+        .label-with-icon { 
+            margin-bottom: 5px; 
+            font-size: 0.65em; 
+            color: var(--brand-cyan); 
+            text-transform: uppercase; 
+            font-weight: 700; 
+            letter-spacing: 0.8px; 
+        }
+
+        input { 
+            width: 100%; padding: 12px; border: none; border-radius: 12px; font-size: 16px; 
+            color: var(--brand-navy); box-sizing: border-box; background: var(--field-light);
+            box-shadow: inset 0 2px 4px rgba(0,0,0,0.1);
+        }
+
+        .result-box { 
+            margin-top: 20px; padding: 15px; background: var(--field-light);
+            border-radius: 20px; text-align: center; color: var(--brand-navy); 
+            box-shadow: 0 8px 20px rgba(0, 0, 0, 0.4);
+        }
+
+        .result-val { font-size: 2.2em; font-weight: 800; display: block; color: var(--brand-cyan); }
+        .efficiency { font-size: 0.8em; color: #718096; margin-top: 5px; font-weight: bold; }
+
+        footer { margin-top: 20px; text-align: center; font-size: 0.65em; color: var(--text-gray); line-height: 1.5; }
+        footer a { color: var(--brand-cyan); text-decoration: none; font-weight: bold; }
+
+        #easter-egg {
+            position: fixed; top: 50%; left: 50%; transform: translate(-50%, -50%);
+            background: rgba(14, 29, 58, 0.98); color: var(--brand-cyan);
+            padding: 25px; border-radius: 24px; text-align: center; z-index: 1000;
+            display: none; border: 2px solid var(--brand-cyan); width: 250px;
+            animation: popIn 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+        }
+        @keyframes popIn { from { transform: translate(-50%, -50%) scale(0.5); opacity: 0; } to { transform: translate(-50%, -50%) scale(1); opacity: 1; } }
+    </style>
+</head>
+<body>
+
+<div id="easter-egg">Powered by<br><span style="color:white; font-size: 0.85em;">Werbedruck-GM</span><br><span style="color:white">DER MEISTER</span></div>
+
+<div class="card">
+    <div class="top-controls">
+        <select id="unitPicker" onchange="calc()">
+            <option value="mm">mm</option>
+            <option value="inc">inch</option>
+        </select>
+        <select id="langPicker" onchange="changeLang()">
+            <option value="de">DE</option>
+            <option value="en">EN</option>
+            <option value="fr">FR</option>
+            <option value="nl">NL</option>
+            <option value="pl">PL</option>
+            <option value="es">ES</option>
+            <option value="it">IT</option>
+            <option value="hu">HU</option>
+            <option value="ru">RU</option>
+            <option value="ja">JA</option>
+        </select>
+    </div>
+
+    <div class="logo-container" id="logo_trigger">
+        <img src="GS-Logo.jpg" alt="Gröner-Schulze">
+    </div>
+    
+    <div class="app-title" id="main_title">Nutzen-Optimierer</div>
+    <div class="divider"></div>
+
+    <div id="lbl_plate" class="label-with-icon">Plattenmaß / Rolle</div>
+    <div class="input-row">
+        <div class="input-group">
+            <input type="number" id="pW" value="3000" oninput="calc()" placeholder="B">
+        </div>
+        <div class="input-group">
+            <input type="number" id="pH" value="1500" oninput="calc()" placeholder="H">
+        </div>
+    </div>
+
+    <div id="lbl_part" class="label-with-icon">Schild- / Nutzenmaß</div>
+    <div class="input-row">
+        <div class="input-group">
+            <input type="number" id="nW" placeholder="Breite" oninput="calc()">
+        </div>
+        <div class="input-group">
+            <input type="number" id="nH" placeholder="Höhe" oninput="calc()">
+        </div>
+    </div>
+
+    <div class="input-group">
+        <div id="lbl_gap" class="label-with-icon">Schnittspalt / Fräser</div>
+        <input type="number" id="gap" value="3" oninput="calc()">
+    </div>
+
+    <div class="result-box">
+        <span id="lbl_res_text" style="font-size: 0.7em; text-transform: uppercase; font-weight: bold; color: #718096;">Max. Stückzahl</span>
+        <span class="result-val" id="res">0</span>
+        <div class="efficiency" id="eff">Effizienz: 0%</div>
+    </div>
+    
+    <footer>
+        <strong>Gröner-Schulze</strong><br>
+        © 2024-2026 | V1.2 Nutzen-Rechner<br>
+        <div style="margin-top: 8px;">
+            <a href="https://www.groener-schulze.com/impressum" target="_blank">Impressum</a> | 
+            <a href="https://www.groener-schulze.com/datenschutzbestimmungen" target="_blank">Datenschutz</a>
+        </div>
+    </footer>
+</div>
+
+<script>
+let clickCount = 0;
+document.getElementById('logo_trigger').onclick = function() {
+    clickCount++;
+    if (clickCount === 5) {
+        const egg = document.getElementById('easter-egg');
+        egg.style.display = 'block';
+        setTimeout(() => { egg.style.display = 'none'; clickCount = 0; }, 3000);
+    }
+};
+
+const translations = {
+    de: { title: "Nutzen-Optimierer", plate: "Plattenmaß / Rolle", part: "Schild- / Nutzenmaß", gap: "Schnittspalt / Fräser", res: "Max. Stückzahl", eff: "Effizienz" },
+    en: { title: "Layout Optimizer", plate: "Sheet / Roll Size", part: "Part / Sign Size", gap: "Cutter / Gap", res: "Max. Pieces", eff: "Efficiency" },
+    fr: { title: "Optimiseur de Mise", plate: "Taille de Plaque", part: "Taille de l'Élément", gap: "Largeur de Coupe", res: "Nombre Max.", eff: "Efficacité" },
+    nl: { title: "Indeling Optimizer", plate: "Plaat / Rol Maat", part: "Stuk / Bord Maat", gap: "Snijbreedte", res: "Max. Aantal", eff: "Efficiëntie" },
+    pl: { title: "Optymalizator Arkusza", plate: "Wymiar Płyty", part: "Wymiar Elementu", gap: "Szerokość Cięcia", res: "Maks. Ilość", eff: "Efektywność" },
+    es: { title: "Optimizador de Diseño", plate: "Tamaño de Placa", part: "Tamaño de Pieza", gap: "Ancho de Corte", res: "Cant. Máx.", eff: "Eficiencia" },
+    it: { title: "Ottimizzatore Layout", plate: "Dimensione Lastra", part: "Dimensione Pezzo", gap: "Larghezza Taglio", res: "Pezzi Max", eff: "Efficienza" },
+    hu: { title: "Kiosztás Optimalizáló", plate: "Tábla / Tekercs méret", part: "Elem méret", gap: "Vágási szélesség", res: "Max. darabszám", eff: "Hatékonyság" },
+    ru: { title: "Оптимизатор раскроя", plate: "Размер листа/рулона", part: "Размер детали", gap: "Ширина реза", res: "Макс. кол-во", eff: "Эффективность" },
+    ja: { title: "レイアウト最適化", plate: "シート/ロールサイズ", part: "パーツサイズ", gap: "切り代", res: "最大数", eff: "効率" }
+};
+
+function changeLang() {
+    const l = document.getElementById('langPicker').value;
+    const u = document.getElementById('unitPicker').value;
+    const unitText = "(" + u + ")";
+    const t = translations[l] || translations['de'];
+
+    document.getElementById('main_title').innerText = t.title;
+    document.getElementById('lbl_plate').innerText = t.plate + " " + unitText;
+    document.getElementById('lbl_part').innerText = t.part + " " + unitText;
+    document.getElementById('lbl_gap').innerText = t.gap + " " + unitText;
+    document.getElementById('lbl_res_text').innerText = t.res;
+    calc();
+}
+
+function calc() {
+    const pW = parseFloat(document.getElementById('pW').value) || 0;
+    const pH = parseFloat(document.getElementById('pH').value) || 0;
+    const nW = parseFloat(document.getElementById('nW').value) || 0;
+    const nH = parseFloat(document.getElementById('nH').value) || 0;
+    const gap = parseFloat(document.getElementById('gap').value) || 0;
+    const l = document.getElementById('langPicker').value;
+    const t = translations[l] || translations['de'];
+
+    if (nW > 0 && nH > 0 && pW > 0 && pH > 0) {
+        const nx1 = Math.floor((pW + gap) / (nW + gap));
+        const ny1 = Math.floor((pH + gap) / (nH + gap));
+        const total1 = Math.max(0, nx1 * ny1);
+
+        const nx2 = Math.floor((pW + gap) / (nH + gap));
+        const ny2 = Math.floor((pH + gap) / (nW + gap));
+        const total2 = Math.max(0, nx2 * ny2);
+
+        const bestTotal = Math.max(total1, total2);
+        const efficiency = ((bestTotal * (nW * nH)) / (pW * pH)) * 100;
+
+        document.getElementById('res').innerText = bestTotal;
+        document.getElementById('eff').innerText = t.eff + ": " + efficiency.toFixed(1) + "%";
+    } else {
+        document.getElementById('res').innerText = "0";
+        document.getElementById('eff').innerText = t.eff + ": 0%";
+    }
+}
+
+function initApp() {
+    const userLang = navigator.language.substring(0, 2).toLowerCase();
+    const langPicker = document.getElementById('langPicker');
+    
+    for (let i = 0; i < langPicker.options.length; i++) {
+        if (langPicker.options[i].value === userLang) {
+            langPicker.selectedIndex = i;
+            break;
+        }
+    }
+    changeLang();
+}
+
+initApp();
+</script>
+</body>
+</html>
